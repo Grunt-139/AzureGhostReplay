@@ -1,31 +1,31 @@
 #Azure Ghost Replay
 
 ##Table of Contents
-1. [What is Ghost Replay](#What is Ghost Replay)
-2. [Why Azure Storage](#Why Azure Storage)
-3. [Setting it All Up](#Setting it All up)
-  1. [What's Needed](#What's Needed)
-  2. [Setting it Up](#Setting it Up)
-4. [Ghost Replay In Action](##Ghost Replay In Action)
-  1. [Initialization](#Initialization)
-  2. [Session Functions](#Session Functions)
-  3. [Write Functions](#Write Functions)
-  4. [Read Functions](#Read Functions)
-  5. [Utility Functions](#Utility Functions)
-  6. [Expanding](#Expansion)
+1. [What is Ghost Replay](#what-is-ghost-replay)
+2. [Why Azure Storage](#why-azure-storage)
+3. [Setting it All Up](#setting-it-all-up)
+  1. [What's Needed](#whats-needed)
+  2. [Setting it Up](#setting-it-up)
+4. [Ghost Replay In Action](#ghost-replay-in-action)
+  1. [Initialization](#initialization)
+  2. [Session Functions](#session-functions)
+  3. [Write Functions](#write-functions)
+  4. [Read Functions](#read-functions)
+  5. [Utility Functions](#utility-functions)
+  6. [Expanding](#expansion)
 
 
-##What is Ghost Replay?
+## What is Ghost Replay?
 
 'Ghost Replay' is a term used to describe a game system that shows the player's progress, with the player being 'ghosted' out.
 Commonly found in racing games, where the player races a track and then has to beat their 'ghost'. They replay the level, with a ghosted out version of themselves racing as well.
 
-##Why Azure Storage?
+## Why Azure Storage?
 
 The issue with this sort of system is that it could involve storing large amounts of data. Which often is not an option.
 Azure Storage offers a managed, easily scaled, and fast storage option to store this sort of data. 
 
-##Setting it All Up
+## Setting it All Up
 This implementation of a Ghost Replay system will use Azure Storage to store and later read the data back.
 Specifically, a NodeJS server running on an Azure Website (or other site)
 This Azure - NodeJS communication is brought to us by this fine repository, [Azure Storage Node](https://github.com/Azure/azure-storage-node)
@@ -34,7 +34,7 @@ For information or possible extensions about the backend aspect of this solution
 
 For passing data back and forth, Socket.IO is used
 
-###What's Needed
+### What's Needed
 1. Azure Subscription
 2. Text Editor
   - Such as Notepad++ or VSCode
@@ -42,7 +42,7 @@ For passing data back and forth, Socket.IO is used
   - Like Filezilla
 
 
-###Setting it Up
+### Setting it Up
 1. [Sign up for Azure](https://azure.microsoft.com/en-us/pricing/free-trial/?WT.mc_id=azurebg_CA_sem_google_BR_BRTop_Nontest_FreeTrial_azure&WT.srch=1)
 2. [Navigate to the Azure Portal](https://portal.azure.com/)
 3. **Create a Storage Account**
@@ -82,9 +82,9 @@ For passing data back and forth, Socket.IO is used
     - Drag and drop the contents of **Server Side Code** here
     
     
-##Ghost Replay in Action
+## Ghost Replay in Action
 
-###Initialization
+### Initialization
 Initialization is very straight forward
 
 Add a reference to AzureGhostReplay.js
@@ -167,11 +167,11 @@ The name generated is based off the date, time, and uuid.
 Now data can be written and read from Azure
 
 
-##Session Functions
+## Session Functions
 
 The following functions handle the getting, and setting of the current session.
 
-###**SetCurrentSession(sessionId)**
+###SetCurrentSession(sessionId)
 
 Sets the current session
 
@@ -184,7 +184,7 @@ Sets the current session
 		azure.SetCurrentSession("MySession");
   
   
-###**GetCurrentSession()**
+###GetCurrentSession()
 
 Returns the name of the current session
 
@@ -204,7 +204,7 @@ Returns the name of the current session
     
 ``` 
     
-**StartNewSession()**
+###StartNewSession()
 
 Begins a new session (sets the local currentSession variable), based on the date, time and uuid
 
@@ -221,7 +221,7 @@ Begins a new session (sets the local currentSession variable), based on the date
 ```
 
 
-##Write Functions
+## Write Functions
 
 The following functions handle writing to Azure.
 
@@ -430,7 +430,7 @@ Clears the 'buffer' of the specific session
 
 ```
      
-##Read Functions
+## Read Functions
 
 ###ListGameSessions(callback)
 
@@ -585,7 +585,7 @@ This allows the data to be parsed out on the client side. Obviously use this wit
 
 ```
 
-##Utility Functions
+## Utility Functions
 
 ###Delete Operations
 
@@ -907,6 +907,8 @@ Returns whether the Azure connection is established or not
 
 **BLOB_EXIST** : Fired on DoesSessionExist
 
-##Expansion
+## Expansion
 
+Any questions, comments, concerns. Feel free to let me know, here or [@WStieh](https://twitter.com/wstieh)
 
+Good luck and happy coding!
