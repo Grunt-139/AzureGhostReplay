@@ -69,7 +69,8 @@ var AzureGhostReplay = function (url, uid) {
 				socket.emit('createContainerIfNotExists', { containerName: userId, id: userId });
 			}
 		});
-
+		//Create a container for ourselves
+		socket.emit('createContainerIfNotExists', { containerName: userId, id: userId });
 
 
 	});
@@ -568,7 +569,7 @@ var AzureGhostReplay = function (url, uid) {
 		DoesSessionExist: AzureGhostReplay.prototype.DoesSessionExist,
 		FindAndRemoveEventListener: AzureGhostReplay.prototype.FindAndRemoveEventListener,
 		AddSocketEventListener: AzureGhostReplay.prototype.AddSocketEventListener,
-		IsConnected : AzureGhostReplay.prototype.IsConnected,
+		IsConnected: AzureGhostReplay.prototype.IsConnected,
 		//Server Events
 		LIST_BLOBS: LIST_BLOBS,
 		FILE_DATA: FILE_DATA,
