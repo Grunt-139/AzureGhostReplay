@@ -1,9 +1,21 @@
+/**
+Copyright (c) 2015 Will Stieh @WStieh
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 var AzureGhostReplay = function (url, uid) {
 
 	var initialized = false;
 
+	var allowBuffer = false;
 
-
+	var writeDebug = true;
+	
 	//Response Event names
 	var LIST_BLOBS = 'sendBlobList';
 	var FILE_DATA = 'sendFileData';
@@ -42,7 +54,7 @@ var AzureGhostReplay = function (url, uid) {
 		
 		//Print out we have connected
 		console.log("Connected to server");
-
+		allowBuffer = true;
 
 		socket.on(NEW_CONTAINER, function AddNewContainer(data) {
 			initialized = true;
@@ -58,11 +70,11 @@ var AzureGhostReplay = function (url, uid) {
 
 	socket.on('disconnect', function () {
 		console.log("Disconnected from server");
-		initialized = false;
+		allowBuffer = false;
 	});
 
 	socket.on(DEBUG_MESSAGE, function (data) {
-		console.log(data);
+		AzureGhostReplay.prototype.PrintDebug(data)
 	});
 	
 	//Tell the server that we exist
@@ -81,12 +93,12 @@ var AzureGhostReplay = function (url, uid) {
 	//Lists all the blobs in a container
 	AzureGhostReplay.prototype.ListGameSessions = function (callback) {
 		if (!initialized) {
-			throw "Azure Connection Not Initialized";
+			console.log("Azure Connection Not Initialized");
 			return;
 		}
 		//Add the callback as an event listener to the socket
 		socket.on(LIST_BLOBS, callback || function GetList(data) {
-			console.log(data);
+			AzureGhostReplay.prototype.PrintDebug(data)
 			AzureGhostReplay.prototype.FindAndRemoveEventListener(GetList, LIST_BLOBS);
 		});
 
@@ -98,7 +110,7 @@ var AzureGhostReplay = function (url, uid) {
 	//Can attempt to parse the data into an object
 	AzureGhostReplay.prototype.ReadFromCurrentSession = function (separator, start, range, callback) {
 		if (!initialized) {
-			throw "Azure Connection Not Initialized";
+			console.log("Azure Connection Not Initialized");
 			return;
 		}
 		
@@ -108,7 +120,7 @@ var AzureGhostReplay = function (url, uid) {
 		}
 
 		socket.on(FILE_DATA, callback || function ReadFileData(data) {
-			console.log(data);
+			AzureGhostReplay.prototype.PrintDebug(data)
 			AzureGhostReplay.prototype.FindAndRemoveEventListener(ReadFileData, FILE_DATA);
 		});
 
@@ -120,7 +132,7 @@ var AzureGhostReplay = function (url, uid) {
 	//Passes back the Raw Data from the session, allowing the user to parse it themselves
 	AzureGhostReplay.prototype.ReadFromCurrentSessionRaw = function (callback) {
 		if (!initialized) {
-			throw "Azure Connection Not Initialized";
+			console.log("Azure Connection Not Initialized");
 			return;
 		}
 		
@@ -130,7 +142,7 @@ var AzureGhostReplay = function (url, uid) {
 		}
 
 		socket.on(FILE_DATA, callback || function ReadFileDataRaw(data) {
-			console.log(data);
+			AzureGhostReplay.prototype.PrintDebug(data)
 			AzureGhostReplay.prototype.FindAndRemoveEventListener(ReadFileDataRaw, FILE_DATA);
 		});
 
@@ -143,12 +155,12 @@ var AzureGhostReplay = function (url, uid) {
 	//Reads from a specific blob
 	AzureGhostReplay.prototype.ReadFromSession = function (sessionId, separator, start, range, callback) {
 		if (!initialized) {
-			throw "Azure Connection Not Initialized";
+			console.log("Azure Connection Not Initialized");
 			return;
 		}
 
 		socket.on(FILE_DATA, callback || function ReadFileDataFromSelection(data) {
-			console.log(data);
+			AzureGhostReplay.prototype.PrintDebug(data)
 			AzureGhostReplay.prototype.FindAndRemoveEventListener(ReadFileDataFromSelection, FILE_DATA);
 		});
 
@@ -158,14 +170,14 @@ var AzureGhostReplay = function (url, uid) {
 	
 	
 	//Passes back the Raw Data from the session, allowing the user to parse it themselves
-	AzureGhostReplay.prototype.ReadFromSessionRaw = function (userId, sessionId, callback) {
+	AzureGhostReplay.prototype.ReadFromSessionRaw = function (sessionId, callback) {
 		if (!initialized) {
-			throw "Azure Connection Not Initialized";
+			console.log("Azure Connection Not Initialized");
 			return;
 		}
 
 		socket.on(FILE_DATA, callback || function ReadFileDataFromSelectionRaw(data) {
-			console.log(data);
+			AzureGhostReplay.prototype.PrintDebug(data)
 			AzureGhostReplay.prototype.FindAndRemoveEventListener(ReadFileDataFromSelectionRaw, FILE_DATA);
 		});
 
@@ -180,6 +192,11 @@ var AzureGhostReplay = function (url, uid) {
 		currentSession = sessionId;
 	};
 	
+	//Returns the current Session id
+	AzureGhostReplay.prototype.GetCurrentSession = function(){
+		return currentSession;
+	}
+	
 	
 	//Creates/Sets a new session
 	AzureGhostReplay.prototype.StartNewSession = function () {
@@ -190,14 +207,14 @@ var AzureGhostReplay = function (url, uid) {
 	};
 	
 	//Checks if a session exists
-	AzureGhostReplay.prototype.DoesSessionExist = function (sessionId,callback) {
+	AzureGhostReplay.prototype.DoesSessionExist = function (sessionId, callback) {
 		if (!initialized) {
-			throw "Azure Connection Not Initialized";
+			console.log("Azure Connection Not Initialized");
 			return;
 		}
 
 		socket.on(BLOB_EXIST, callback || function DoesBlobExist(data) {
-			console.log(data);
+			AzureGhostReplay.prototype.PrintDebug(data)
 			AzureGhostReplay.prototype.FindAndRemoveEventListener(DoesBlobExist, BLOB_EXIST);
 		});
 
@@ -209,7 +226,7 @@ var AzureGhostReplay = function (url, uid) {
 	//Writes data to the current session
 	AzureGhostReplay.prototype.WriteToCurrentSession = function (data, callback) {
 		if (!initialized) {
-			throw "Azure Connection Not Initialized";
+			console.log("Azure Connection Not Initialized");
 			return;
 		}
 		
@@ -219,7 +236,7 @@ var AzureGhostReplay = function (url, uid) {
 		}
 
 		socket.on(WRITE_BLOB, callback || function WriteBlob(data) {
-			console.log(data);
+			AzureGhostReplay.prototype.PrintDebug(data)
 			AzureGhostReplay.prototype.FindAndRemoveEventListener(WriteBlob, WRITE_BLOB);
 		});
 
@@ -231,8 +248,8 @@ var AzureGhostReplay = function (url, uid) {
 	//Writes to a buffer for a the current session
 	//To be used in conjunction with WriteDataFromBuffer
 	AzureGhostReplay.prototype.AddToBuffer = function (newData, callback) {
-		if (!initialized) {
-			throw "Azure Connection Not Initialized";
+		if (!allowBuffer) {
+			console.log("Cannot Access Buffer Yet");
 			return;
 		}
 		
@@ -242,7 +259,7 @@ var AzureGhostReplay = function (url, uid) {
 		}
 
 		socket.on(ADD_TO_BUFFER, callback || function AddToBuffer(data) {
-			console.log(data);
+			AzureGhostReplay.prototype.PrintDebug(data)
 			AzureGhostReplay.prototype.FindAndRemoveEventListener(AddToBuffer, ADD_TO_BUFFER);
 		});
 
@@ -253,8 +270,8 @@ var AzureGhostReplay = function (url, uid) {
 	
 	//Gets the current session's write buffer
 	AzureGhostReplay.prototype.GetWriteBufferOfCurrentSession = function (callback) {
-		if (!initialized) {
-			throw "Azure Connection Not Initialized";
+		if (!allowBuffer) {
+			console.log("Cannot Access Buffer Yet");
 			return;
 		}
 		
@@ -264,7 +281,7 @@ var AzureGhostReplay = function (url, uid) {
 		}
 
 		socket.on(RECEIVE_WRITE_BUFFER, callback || function GetWriteBufferOfCurrent(data) {
-			console.log(data);
+			AzureGhostReplay.prototype.PrintDebug(data)
 			AzureGhostReplay.prototype.FindAndRemoveEventListener(GetWriteBufferOfCurrent, RECEIVE_WRITE_BUFFER);
 		});
 
@@ -274,8 +291,8 @@ var AzureGhostReplay = function (url, uid) {
 	
 	//Gets the current session's write buffer
 	AzureGhostReplay.prototype.GetWriteBufferOfSession = function (sessionId, callback) {
-		if (!initialized) {
-			throw "Azure Connection Not Initialized";
+		if (!allowBuffer) {
+			console.log("Cannot Access Buffer Yet");
 			return;
 		}
 		
@@ -285,7 +302,7 @@ var AzureGhostReplay = function (url, uid) {
 		}
 
 		socket.on(RECEIVE_WRITE_BUFFER, callback || function GetWriteBuffer(data) {
-			console.log(data);
+			AzureGhostReplay.prototype.PrintDebug(data)
 			AzureGhostReplay.prototype.FindAndRemoveEventListener(GetWriteBuffer, RECEIVE_WRITE_BUFFER);
 		});
 
@@ -300,8 +317,8 @@ var AzureGhostReplay = function (url, uid) {
 	
 	//Writes the data stored in the buffer to the blob
 	AzureGhostReplay.prototype.WriteFromBuffer = function (callback) {
-		if (!initialized) {
-			throw "Azure Connection Not Initialized";
+		if (!allowBuffer) {
+			console.log("Cannot Access Buffer Yet");
 			return;
 		}
 
@@ -311,7 +328,7 @@ var AzureGhostReplay = function (url, uid) {
 		}
 
 		socket.on(WRITE_FROM_BUFFER, callback || function WriteFromBuffer(data) {
-			console.log(data);
+			AzureGhostReplay.prototype.PrintDebug(data)
 			AzureGhostReplay.prototype.FindAndRemoveEventListener(WriteFromBuffer, WRITE_FROM_BUFFER);
 		});
 
@@ -326,18 +343,20 @@ var AzureGhostReplay = function (url, uid) {
 	//Clears all the game sessions of the current user
 	AzureGhostReplay.prototype.ClearUserSaves = function (callback) {
 		if (!initialized) {
-			throw "Azure Connection Not Initialized";
+			console.log("Azure Connection Not Initialized");
 			return;
 		}
 
 		if (allowDeletion) {
 
 			socket.on(CLEAR_CONTAINER, callback || function ClearSaves(data) {
-				console.log(data);
+				AzureGhostReplay.prototype.PrintDebug(data)
 				AzureGhostReplay.prototype.FindAndRemoveEventListener(ClearSaves, CLEAR_CONTAINER);
 			});
 
 			socket.emit('clearContainer', { containerName: userId, id: userId });
+		}else{
+			console.log("Cannot Delete");
 		}
 	};
 	
@@ -346,7 +365,7 @@ var AzureGhostReplay = function (url, uid) {
 	//Before this can be used, the service must be told to allow deletion
 	AzureGhostReplay.prototype.DeleteUser = function (callback) {
 		if (!initialized) {
-			throw "Azure Connection Not Initialized";
+			console.log("Azure Connection Not Initialized");
 			return;
 		}
 
@@ -354,27 +373,33 @@ var AzureGhostReplay = function (url, uid) {
 		if (allowDeletion) {
 
 			socket.on(DELETE_CONTAINER, callback || function removeUser(data) {
-				console.log(data);
+				AzureGhostReplay.prototype.PrintDebug(data)
 				AzureGhostReplay.prototype.FindAndRemoveEventListener(removeUser, DELETE_CONTAINER);
 			});
 
 			socket.emit('deleteContainer', { containerName: userId, id: userId });
+		} else {
+			console.log("Cannot delete records");
 		}
 	};
 
 
 	AzureGhostReplay.prototype.RemoveGameSession = function (sessionId, callback) {
 		if (!initialized) {
-			throw "Azure Connection Not Initialized";
+			console.log("Azure Connection Not Initialized");
 			return;
 		}
 
-		socket.on(DELETE_BLOB, callback || function RemoveSession(data) {
-			console.log(data);
-			AzureGhostReplay.prototype.FindAndRemoveEventListener(RemoveSession, DELETE_BLOB);
-		});
+		if (allowDeletion) {
+			socket.on(DELETE_BLOB, callback || function RemoveSession(data) {
+				AzureGhostReplay.prototype.PrintDebug(data)
+				AzureGhostReplay.prototype.FindAndRemoveEventListener(RemoveSession, DELETE_BLOB);
+			});
 
-		socket.emit('deleteBlob', { containerName: userId, blobName: sessionId });
+			socket.emit('deleteBlob', { containerName: userId, blobName: sessionId });
+		} else {
+			console.log("Cannot delete records");
+		}
 	};
 
 
@@ -382,7 +407,7 @@ var AzureGhostReplay = function (url, uid) {
 
 	AzureGhostReplay.prototype.ClearWriteBufferOfCurrent = function (callback) {
 		if (!initialized) {
-			throw "Azure Connection Not Initialized";
+			console.log("Azure Connection Not Initialized");
 			return;
 		}
 		
@@ -392,7 +417,7 @@ var AzureGhostReplay = function (url, uid) {
 		}
 
 		socket.on(CLEAR_WRITE_BUFFER, callback || function GetWriteBufferOfCurrent(data) {
-			console.log(data);
+			AzureGhostReplay.prototype.PrintDebug(data)
 			AzureGhostReplay.prototype.FindAndRemoveEventListener(GetWriteBufferOfCurrent, CLEAR_WRITE_BUFFER);
 		});
 
@@ -402,7 +427,7 @@ var AzureGhostReplay = function (url, uid) {
 
 	AzureGhostReplay.prototype.ClearWriteBuffer = function (sessionId, callback) {
 		if (!initialized) {
-			throw "Azure Connection Not Initialized";
+			console.log("Azure Connection Not Initialized");
 			return;
 		}
 		
@@ -412,7 +437,7 @@ var AzureGhostReplay = function (url, uid) {
 		}
 
 		socket.on(CLEAR_WRITE_BUFFER, callback || function GetWriteBufferOfCurrent(data) {
-			console.log(data);
+			AzureGhostReplay.prototype.PrintDebug(data)
 			AzureGhostReplay.prototype.FindAndRemoveEventListener(GetWriteBufferOfCurrent, CLEAR_WRITE_BUFFER);
 		});
 
@@ -421,8 +446,8 @@ var AzureGhostReplay = function (url, uid) {
 	};
 	
 	//Utility function that allows you to attach a listener to an event
-	AzureGhostReplay.prototype.AddSocketEventListner = function(listener,eventName){
-		socket.on(eventName,listener);
+	AzureGhostReplay.prototype.AddSocketEventListener = function (listener, eventName) {
+		socket.on(eventName, listener);
 	};
 
 	//Utility function, that finds and removes a listener from the socket
@@ -438,15 +463,68 @@ var AzureGhostReplay = function (url, uid) {
 		} else {
 			console.log("Event: " + eventName + " could not be found on Socket");
 		}
+	};
+	
+	/*****************************
+	 * Writes a debug or other returned message to the console
+	*************************** */
+	AzureGhostReplay.prototype.PrintDebug = function (message) {
+		if (writeDebug) {
+			console.log(message);
+		}
 	}
+	
+	/***************
+	 * Allows Debug messages to be written
+	********************* */
+	AzureGhostReplay.prototype.AllowDebug = function () {
+		writeDebug = true;
+	};
+	
+	/************************
+	 * Stops debug messages from being printed
+	************************** */
+	AzureGhostReplay.prototype.TurnOffDebug = function () {
+		writeDebug = false;
+	};
+
+	/**********************
+	 * Allows the user from deleting records
+	**************************** */
+	AzureGhostReplay.prototype.AllowDeletion = function () {
+		allowDeletion = true;
+	};
+
+	/**********************
+	 * Stops the deletion of records
+	******************************* */
+	AzureGhostReplay.prototype.ForbidDeletion = function () {
+		allowDeletion = false;
+	};
+	
+	/**************
+	 * Returns whether it is initialized or not
+	**************** */
+	AzureGhostReplay.prototype.IsInitialized = function(){
+		if(initialized){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
 			
 	
 	//Returns
 	return {
 		Socket: socket,
-		AllowDeletion: allowDeletion,
+		AllowDebug: AzureGhostReplay.prototype.AllowDebug,
+		TurnOffDebug: AzureGhostReplay.prototype.TurnOffDebug,
+		AllowDeletion: AzureGhostReplay.prototype.AllowDeletion,
+		ForbidDeletion: AzureGhostReplay.prototype.ForbidDeletion,
 		UserID: userId,
 		InitializationEvent: initializationEvent,
+		IsInitialized: AzureGhostReplay.prototype.IsInitialized,
 		//Read Functions
 		ListGameSessions: AzureGhostReplay.prototype.ListGameSessions,
 		ReadFromSession: AzureGhostReplay.prototype.ReadFromSession,
@@ -455,6 +533,7 @@ var AzureGhostReplay = function (url, uid) {
 		ReadFromCurrentSessionRaw: AzureGhostReplay.prototype.ReadFromCurrentSessionRaw,
 		//Set/Create Session
 		SetCurrentSession: AzureGhostReplay.prototype.SetCurrentSession,
+		GetCurrentSession: AzureGhostReplay.prototype.GetCurrentSession,
 		StartNewSession: AzureGhostReplay.prototype.StartNewSession,
 		//Write Functions
 		WriteToCurrentSession: AzureGhostReplay.prototype.WriteToCurrentSession,
@@ -465,12 +544,12 @@ var AzureGhostReplay = function (url, uid) {
 		ClearWriteBufferOfCurrent: AzureGhostReplay.prototype.ClearWriteBufferOfCurrent,
 		ClearWriteBufferOfSession: AzureGhostReplay.prototype.ClearWriteBuffer,
 		//Utility functions
-		Deleteuser: AzureGhostReplay.prototype.DeleteUser,
+		DeleteUser: AzureGhostReplay.prototype.DeleteUser,
 		ClearUserSaves: AzureGhostReplay.prototype.ClearUserSaves,
 		RemoveGameSession: AzureGhostReplay.prototype.RemoveGameSession,
-		DoesSessionExist : AzureGhostReplay.prototype.DoesSessionExist,
+		DoesSessionExist: AzureGhostReplay.prototype.DoesSessionExist,
 		FindAndRemoveEventListener: AzureGhostReplay.prototype.FindAndRemoveEventListener,
-		AddSocketEventListener : AzureGhostReplay.prototype.AddSocketEventListener,
+		AddSocketEventListener: AzureGhostReplay.prototype.AddSocketEventListener,
 		//Server Events
 		LIST_BLOBS: LIST_BLOBS,
 		FILE_DATA: FILE_DATA,

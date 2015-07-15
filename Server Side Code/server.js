@@ -1,3 +1,25 @@
+/**
+Copyright (c) 2015 Will Stieh @WStieh
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+
+* Credit where credit is due
+* This project makes use of Azure-Storage-For-Node
+* This server.js wraps some of the functions found within Azure-Storage-For-Node
+* AzureGhostReplay.js then wraps it up for the client side
+* Found here https://github.com/Azure/azure-storage-node  
+*/
+
+
+
+
+
+
 //Initalize Express
 var express = require('express');
 var app = express();
@@ -295,7 +317,7 @@ function writeToBlob(data, responseEvent) {
     //If it exists, we say we can't write to an existing file
     //We could download and rebuild the blob but that could end in a race condition so at this time it won't be an option
     if (result) {
-      sendResponseToClient(data.id, returnEvent, { Message: "Cannot Append to Existing File" });
+      sendResponseToClient(data.id, returnEvent, { Error: "Cannot Append to Existing File" });
     } else {
       //If it doesn't exist create a new one and write to it
       blobSvc.createBlockBlobFromText(data.containerName, data.blobName, data.data, function (error, result, response) {
@@ -509,7 +531,7 @@ function readFromBlob(data) {
         }
       });
     } else {
-      sendResponseToClient(data.id, FILE_DATA, { Message: "Blob " + data.containerName + " / " + data.blobName + " does not exist", Error: error });
+      sendResponseToClient(data.id, FILE_DATA, { Error: "Blob " + data.containerName + " / " + data.blobName + " does not exist", ServerError: error });
     }
 
   });
@@ -537,11 +559,11 @@ function readFromBlobRaw(data) {
         if (error) {
           sendResponseToClient(data.id, FILE_DATA, { Message: "Error Getting Existing Blob's data", Error: error });
         } else {
-          sendResponseToClient(data.id, FILE_DATA, { id: data.id, fileData: text });
+          sendResponseToClient(data.id, FILE_DATA, { fileData: text });
         }
       });
     } else {
-      sendResponseToClient(data.id, FILE_DATA, { Message: "Blob " + data.containerName + " / " + data.blobName + " does not exist", Error: error });
+      sendResponseToClient(data.id, FILE_DATA, { Error: "Blob " + data.containerName + " / " + data.blobName + " does not exist", ServerError: error });
     }
 
   });
