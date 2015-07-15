@@ -305,6 +305,7 @@ The 'buffer' is simply an array of data on the server, it sits there until clear
 ###WriteFromBuffer(callback)
 
 Takes the data stored on the server within the current sessions 'buffer' and writes it to Azure
+The buffer is cleared if the write operation is successful
 
 * **Parameters :** 
   * Callback(data) : Function to handle the Server response, if null a default callback will fire - Event ID is WRITE_FROM_BUFFER
@@ -863,7 +864,7 @@ Event name is **Azure-Init**
 
 ###IsInitialized
 
-Returns whether the Azure connection is established or not
+Returns whether the Azure connection is initialized, meaning a container exists for the user
 
 * **Parameters :**  None
 * **Returns :**  True if user's container has been created/exists, false if not
@@ -878,6 +879,30 @@ Returns whether the Azure connection is established or not
     document.addEventListener('AzureInit',function(e){
 
     			console.log(azure.IsInitialized);//true
+          
+    		});
+    
+```
+
+###IsConnected
+
+Returns whethere there is an azure connection, Socket.IO will drop in and out when inactive so expect this to not always be true.
+The true test is the IsInitialized.
+Expect a delay when using connected is false
+
+* **Parameters :**  None
+* **Returns :**  True if user's container has been created/exists, false if not
+* **Example:**   
+
+
+```
+    var azure = new AzureGhostReplay("http://myazurewebsite.azurewebsites.net","test-user");
+    
+    console.log(azure.IsConnected);//false
+    
+    document.addEventListener('AzureInit',function(e){
+
+    			console.log(azure.IsConnected);//true
           
     		});
     

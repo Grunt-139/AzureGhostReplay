@@ -11,6 +11,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 var AzureGhostReplay = function (url, uid) {
 
 	var initialized = false;
+	var connected = false;
 
 	var allowBuffer = false;
 
@@ -55,22 +56,28 @@ var AzureGhostReplay = function (url, uid) {
 		//Print out we have connected
 		console.log("Connected to server");
 		allowBuffer = true;
-
+		connected = true;
 		socket.on(NEW_CONTAINER, function AddNewContainer(data) {
-			initialized = true;
-			document.dispatchEvent(initializationEvent);
+			if (typeof (data.data.Error) === 'undefined' || !data.data.Error) {
 
-			AzureGhostReplay.prototype.FindAndRemoveEventListener(AddNewContainer, NEW_CONTAINER);
+				initialized = true;
+				document.dispatchEvent(initializationEvent);
+				AzureGhostReplay.prototype.FindAndRemoveEventListener(AddNewContainer, NEW_CONTAINER);
+
+			} else {
+				//Create a container for ourselves
+				socket.emit('createContainerIfNotExists', { containerName: userId, id: userId });
+			}
 		});
-		
-		
-		//Create a container for ourselves
-		socket.emit('createContainerIfNotExists', { containerName: userId, id: userId });
+
+
+
 	});
 
 	socket.on('disconnect', function () {
 		console.log("Disconnected from server");
 		allowBuffer = false;
+		connected = false;
 	});
 
 	socket.on(DEBUG_MESSAGE, function (data) {
@@ -193,7 +200,7 @@ var AzureGhostReplay = function (url, uid) {
 	};
 	
 	//Returns the current Session id
-	AzureGhostReplay.prototype.GetCurrentSession = function(){
+	AzureGhostReplay.prototype.GetCurrentSession = function () {
 		return currentSession;
 	}
 	
@@ -355,7 +362,7 @@ var AzureGhostReplay = function (url, uid) {
 			});
 
 			socket.emit('clearContainer', { containerName: userId, id: userId });
-		}else{
+		} else {
 			console.log("Cannot Delete");
 		}
 	};
@@ -505,10 +512,21 @@ var AzureGhostReplay = function (url, uid) {
 	/**************
 	 * Returns whether it is initialized or not
 	**************** */
-	AzureGhostReplay.prototype.IsInitialized = function(){
-		if(initialized){
+	AzureGhostReplay.prototype.IsInitialized = function () {
+		if (initialized) {
 			return true;
-		}else{
+		} else {
+			return false;
+		}
+	}
+
+	/**********************************
+	 * Returns whether we are currently connected or not
+	******************************* */
+	AzureGhostReplay.prototype.IsConnected = function () {
+		if (connected) {
+			return true;
+		} else {
 			return false;
 		}
 	}
@@ -550,6 +568,7 @@ var AzureGhostReplay = function (url, uid) {
 		DoesSessionExist: AzureGhostReplay.prototype.DoesSessionExist,
 		FindAndRemoveEventListener: AzureGhostReplay.prototype.FindAndRemoveEventListener,
 		AddSocketEventListener: AzureGhostReplay.prototype.AddSocketEventListener,
+		IsConnected : AzureGhostReplay.prototype.IsConnected,
 		//Server Events
 		LIST_BLOBS: LIST_BLOBS,
 		FILE_DATA: FILE_DATA,
