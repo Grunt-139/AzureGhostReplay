@@ -58,9 +58,11 @@ For passing data back and forth, Socket.IO is used
 6. **Setup the Website**
   1. **First, setup your deployment credentials for FTP**
      - **Preview Azure Portal:** All Settings->Deployment Credentials
+     
 	   - **Classic Azure Portal:** From the Dashboard, click Reset your deployment credentials
   2. **Second, set Environment Variables**
      - **Preview Azure Portal:** All Settings->Application Settings->App Settings
+     
 	   - **Classic Azure Portal:** From the Dashboard, Configure->App Settings
 	 - These Environment Variables are necessary for the NodeJS server to connect
 	 - Located in [Your Storage Account]->All Settings->Keys OR [Your Storage Account] Dashboard->Manage Access Keys(except for Primary Connection String)
@@ -69,12 +71,15 @@ For passing data back and forth, Socket.IO is used
 	     - **AZURE_STORAGE_CONNECTION_STRING:** Primary Connection String (if you can't find it this is the format "DefaultEndpointsProtocol=https;AccountName=STORAGE_ACCOUNT_NAME;AccountKey=PRIMARY_KEY" )
   3. **Turn on WebSockets**
      - **Preview Azure Portal:** All Settings->Application Settings->Web Sockets
+     
 	   - **Classic Azure Portal:** From the Dashboard, Configure->Web Sockets
 7. **Setup the Server**
   - Open up a FTP Client and Connect to the Server
     - Login Credentials are found within the Azure Portal
       - **Preview:** All Settings->Properties
+      
       - **Classic:** Right hand side of screen
+      
       - **Host Name**: Unique for each Azure Subscription
       - **User Name**: [website name]/[username previously set]
       - **Password**: Password set when Deployment Credentials were reset
