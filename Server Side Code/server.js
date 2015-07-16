@@ -239,11 +239,11 @@ function doesBlobExist(data) {
   if (typeof blobSvc === 'undefined') {
     blobSvc = azure.createBlobService();
   }
-  
+
   blobSvc.doesBlobExist(data.containerName, data.blobName, function (error, result) {
-    sendResponseToClient(data.id,BLOB_EXIST,{BlobName: data.blobName,Error:error,Result:result});
+    sendResponseToClient(data.id, BLOB_EXIST, { BlobName: data.blobName, Error: error, Result: result });
   });
-  
+
 };
 
 
@@ -311,17 +311,17 @@ function writeToBlob(data, responseEvent) {
 
     //Send a debug message if there is an error and return
     if (error) {
-      sendResponseToClient(data.id, returnEvent, { Message: "Error Checking " + data.containerName + "--" + data.blobName + " Existence", Error: error });
+      sendResponseToClient(data.id, returnEvent, { Message: "Error Checking " + data.containerName + "--" + data.blobName + " Existence", Error: error, BlobName: data.blobName });
       return;
     }
     //If it exists, we say we can't write to an existing file
     //We could download and rebuild the blob but that could end in a race condition so at this time it won't be an option
     if (result) {
-      sendResponseToClient(data.id, returnEvent, { Error: "Cannot Append to Existing File" });
+      sendResponseToClient(data.id, returnEvent, { Error: "Cannot Append to Existing File", BlobName: data.blobName });
     } else {
       //If it doesn't exist create a new one and write to it
       blobSvc.createBlockBlobFromText(data.containerName, data.blobName, data.data, function (error, result, response) {
-        sendResponseToClient(data.id, returnEvent, { Error: error, Result: result, Response: response });
+        sendResponseToClient(data.id, returnEvent, { Error: error, Result: result, Response: response, BlobName: data.blobName });
       });
     }
   });
@@ -439,12 +439,15 @@ function writeFromBuffer(data) {
   
   //First, find the correct buffer
   var buffer;
+  //If the client is not false, we add to its write buffer
   if (clients.hasOwnProperty(data.id)) {
     buffer = clients[data.id].writeBuffer;
+    sendResponseToClient(data.id, DEBUG_MESSAGE, { Message: "Buffer Found" });
   } else {
     var id = clientById(data.id)
     if (id) {
       buffer = id.writeBuffer;
+      sendResponseToClient(data.id, DEBUG_MESSAGE, { Message: "Buffer Found" });
     }
   }
 
@@ -452,7 +455,7 @@ function writeFromBuffer(data) {
   var name = data.containerName + data.blobName;
  
   //If the client is not false, we add to its write buffer
-  if (buffer) {
+  if (buffer.hasOwnProperty(name)) {
     textToWrite = buffer[name];
   } else {
     sendResponseToClient(data.id, WRITE_FROM_BUFFER, { Error: "No buffer to write from" });
@@ -492,7 +495,7 @@ function readFromBlob(data) {
   blobSvc.doesBlobExist(data.containerName, data.blobName, function (error, result) {
     //If theres an error, we send it off and return
     if (error) {
-      sendResponseToClient(data.id, FILE_DATA, { Message: "Error Checking for " + data.containerName + " blob " + data.blobName, Error: error });
+      sendResponseToClient(data.id, FILE_DATA, { Message: "Error Checking for " + data.containerName + " blob " + data.blobName, Error: error, BlobName: data.blobName});
       return;
     }
 
@@ -500,7 +503,7 @@ function readFromBlob(data) {
     if (result) {
       blobSvc.getBlobToText(data.containerName, data.blobName, function (error, text, blockBlob, response) {
         if (error) {
-          sendResponseToClient(data.id, FILE_DATA, { Message: "Error Getting Existing Blob's data", Error: error });
+          sendResponseToClient(data.id, FILE_DATA, { Message: "Error Getting Existing Blob's data", Error: error, BlobName: data.blobName });
         } else {
           var dataToSend;
           var isEndOfBlob = false;
@@ -527,11 +530,11 @@ function readFromBlob(data) {
 
           }
           //Return the data, and the last section sent (that way we can go on to the next section)
-          sendResponseToClient(data.id, FILE_DATA, { fileData: dataToSend, lastPartSent: lastPart, endOfBlob: isEndOfBlob });
+          sendResponseToClient(data.id, FILE_DATA, { fileData: dataToSend, lastPartSent: lastPart, endOfBlob: isEndOfBlob , BlobName: data.blobName});
         }
       });
     } else {
-      sendResponseToClient(data.id, FILE_DATA, { Error: "Blob " + data.containerName + " / " + data.blobName + " does not exist", ServerError: error });
+      sendResponseToClient(data.id, FILE_DATA, { Error: "Blob " + data.containerName + " / " + data.blobName + " does not exist", ServerError: error , BlobName: data.blobName});
     }
 
   });
@@ -550,20 +553,20 @@ function readFromBlobRaw(data) {
   //Passes the entirety of the blob up as a string in one go
   blobSvc.doesBlobExist(data.containerName, data.blobName, function (error, result) {
     if (error) {
-      sendResponseToClient(data.id, FILE_DATA, { Message: "Error Checking for " + data.containerName + " blob " + data.blobName, Error: error });
+      sendResponseToClient(data.id, FILE_DATA, { Message: "Error Checking for " + data.containerName + " blob " + data.blobName, Error: error , BlobName: data.blobName});
       return;
     }
 
     if (result) {
       blobSvc.getBlobToText(data.containerName, data.blobName, function (error, text, blockBlob, response) {
         if (error) {
-          sendResponseToClient(data.id, FILE_DATA, { Message: "Error Getting Existing Blob's data", Error: error });
+          sendResponseToClient(data.id, FILE_DATA, { Message: "Error Getting Existing Blob's data", Error: error , BlobName: data.blobName});
         } else {
-          sendResponseToClient(data.id, FILE_DATA, { fileData: text });
+          sendResponseToClient(data.id, FILE_DATA, { fileData: text , BlobName: data.blobName});
         }
       });
     } else {
-      sendResponseToClient(data.id, FILE_DATA, { Error: "Blob " + data.containerName + " / " + data.blobName + " does not exist", ServerError: error });
+      sendResponseToClient(data.id, FILE_DATA, { Error: "Blob " + data.containerName + " / " + data.blobName + " does not exist", ServerError: error , BlobName: data.blobName});
     }
 
   });

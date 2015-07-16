@@ -101,7 +101,7 @@ var AzureGhostReplay = function (url, uid) {
 	//Lists all the blobs in a container
 	AzureGhostReplay.prototype.ListGameSessions = function (callback) {
 		if (!initialized) {
-			console.log("Azure Connection Not Initialized");
+			throw "Azure Connection Not Initialized";
 			return;
 		}
 		//Add the callback as an event listener to the socket
@@ -118,7 +118,7 @@ var AzureGhostReplay = function (url, uid) {
 	//Can attempt to parse the data into an object
 	AzureGhostReplay.prototype.ReadFromCurrentSession = function (separator, start, range, callback) {
 		if (!initialized) {
-			console.log("Azure Connection Not Initialized");
+			throw "Azure Connection Not Initialized";
 			return;
 		}
 		
@@ -140,7 +140,7 @@ var AzureGhostReplay = function (url, uid) {
 	//Passes back the Raw Data from the session, allowing the user to parse it themselves
 	AzureGhostReplay.prototype.ReadFromCurrentSessionRaw = function (callback) {
 		if (!initialized) {
-			console.log("Azure Connection Not Initialized");
+			throw "Azure Connection Not Initialized";
 			return;
 		}
 		
@@ -163,7 +163,7 @@ var AzureGhostReplay = function (url, uid) {
 	//Reads from a specific blob
 	AzureGhostReplay.prototype.ReadFromSession = function (sessionId, separator, start, range, callback) {
 		if (!initialized) {
-			console.log("Azure Connection Not Initialized");
+			throw "Azure Connection Not Initialized";
 			return;
 		}
 
@@ -180,7 +180,7 @@ var AzureGhostReplay = function (url, uid) {
 	//Passes back the Raw Data from the session, allowing the user to parse it themselves
 	AzureGhostReplay.prototype.ReadFromSessionRaw = function (sessionId, callback) {
 		if (!initialized) {
-			console.log("Azure Connection Not Initialized");
+			throw "Azure Connection Not Initialized";
 			return;
 		}
 
@@ -217,7 +217,7 @@ var AzureGhostReplay = function (url, uid) {
 	//Checks if a session exists
 	AzureGhostReplay.prototype.DoesSessionExist = function (sessionId, callback) {
 		if (!initialized) {
-			console.log("Azure Connection Not Initialized");
+			throw "Azure Connection Not Initialized";
 			return;
 		}
 
@@ -234,7 +234,7 @@ var AzureGhostReplay = function (url, uid) {
 	//Writes data to the current session
 	AzureGhostReplay.prototype.WriteToCurrentSession = function (data, callback) {
 		if (!initialized) {
-			console.log("Azure Connection Not Initialized");
+			throw "Azure Connection Not Initialized";
 			return;
 		}
 		
@@ -257,7 +257,7 @@ var AzureGhostReplay = function (url, uid) {
 	//To be used in conjunction with WriteDataFromBuffer
 	AzureGhostReplay.prototype.AddToBuffer = function (newData, callback) {
 		if (!allowBuffer) {
-			console.log("Cannot Access Buffer Yet");
+			throw "Cannot Access Buffer Yet";
 			return;
 		}
 		
@@ -279,7 +279,7 @@ var AzureGhostReplay = function (url, uid) {
 	//Gets the current session's write buffer
 	AzureGhostReplay.prototype.GetWriteBufferOfCurrentSession = function (callback) {
 		if (!allowBuffer) {
-			console.log("Cannot Access Buffer Yet");
+			throw "Cannot Access Buffer Yet";
 			return;
 		}
 		
@@ -300,7 +300,7 @@ var AzureGhostReplay = function (url, uid) {
 	//Gets the current session's write buffer
 	AzureGhostReplay.prototype.GetWriteBufferOfSession = function (sessionId, callback) {
 		if (!allowBuffer) {
-			console.log("Cannot Access Buffer Yet");
+			throw "Cannot Access Buffer Yet";
 			return;
 		}
 		
@@ -326,7 +326,7 @@ var AzureGhostReplay = function (url, uid) {
 	//Writes the data stored in the buffer to the blob
 	AzureGhostReplay.prototype.WriteFromBuffer = function (callback) {
 		if (!allowBuffer) {
-			console.log("Cannot Access Buffer Yet");
+			throw "Cannot Access Buffer Yet";
 			return;
 		}
 
@@ -351,7 +351,7 @@ var AzureGhostReplay = function (url, uid) {
 	//Clears all the game sessions of the current user
 	AzureGhostReplay.prototype.ClearUserSaves = function (callback) {
 		if (!initialized) {
-			console.log("Azure Connection Not Initialized");
+			throw "Azure Connection Not Initialized";
 			return;
 		}
 
@@ -364,7 +364,7 @@ var AzureGhostReplay = function (url, uid) {
 
 			socket.emit('clearContainer', { containerName: userId, id: userId });
 		} else {
-			console.log("Cannot Delete");
+			throw "Cannot Delete";
 		}
 	};
 	
@@ -373,7 +373,7 @@ var AzureGhostReplay = function (url, uid) {
 	//Before this can be used, the service must be told to allow deletion
 	AzureGhostReplay.prototype.DeleteUser = function (callback) {
 		if (!initialized) {
-			console.log("Azure Connection Not Initialized");
+			throw "Azure Connection Not Initialized";
 			return;
 		}
 
@@ -387,14 +387,14 @@ var AzureGhostReplay = function (url, uid) {
 
 			socket.emit('deleteContainer', { containerName: userId, id: userId });
 		} else {
-			console.log("Cannot delete records");
+			throw "Cannot delete records";
 		}
 	};
 
 
 	AzureGhostReplay.prototype.RemoveGameSession = function (sessionId, callback) {
 		if (!initialized) {
-			console.log("Azure Connection Not Initialized");
+			throw "Azure Connection Not Initialized";
 			return;
 		}
 
@@ -406,7 +406,7 @@ var AzureGhostReplay = function (url, uid) {
 
 			socket.emit('deleteBlob', { containerName: userId, blobName: sessionId });
 		} else {
-			console.log("Cannot delete records");
+			throw "Cannot delete records";
 		}
 	};
 
@@ -415,7 +415,7 @@ var AzureGhostReplay = function (url, uid) {
 
 	AzureGhostReplay.prototype.ClearWriteBufferOfCurrent = function (callback) {
 		if (!initialized) {
-			console.log("Azure Connection Not Initialized");
+			throw "Azure Connection Not Initialized";
 			return;
 		}
 		
@@ -435,7 +435,7 @@ var AzureGhostReplay = function (url, uid) {
 
 	AzureGhostReplay.prototype.ClearWriteBuffer = function (sessionId, callback) {
 		if (!initialized) {
-			console.log("Azure Connection Not Initialized");
+			throw "Azure Connection Not Initialized";
 			return;
 		}
 		
@@ -466,10 +466,10 @@ var AzureGhostReplay = function (url, uid) {
 			if (socket._callbacks[eventName].indexOf(listener) >= 0) {
 				socket._callbacks[eventName].splice(socket._callbacks[eventName].indexOf(listener), 1);
 			} else {
-				console.log("Listener does not exist on Socket");
+				throw "Listener does not exist on Socket";
 			}
 		} else {
-			console.log("Event: " + eventName + " could not be found on Socket");
+			throw "Event: " + eventName + " could not be found on Socket";
 		}
 	};
 	
